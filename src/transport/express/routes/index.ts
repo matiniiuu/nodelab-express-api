@@ -9,11 +9,11 @@ import { createProfileRoutes } from "./profile.route";
 
 export const createRoutes = (attrs: ExpressServerAttr) => {
     const router = express.Router();
-    router.use("/auth", authLimiter, createAuthRoutes(attrs.AuthService));
+    router.use("/auth", authLimiter, createAuthRoutes(attrs.authService));
     router.use(
         "/profile",
         authentication(),
-        createProfileRoutes(attrs.ProfileService),
+        createProfileRoutes(attrs.profileService),
     );
 
     return router;

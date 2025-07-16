@@ -16,8 +16,8 @@ import { createRoutes } from "./routes";
 import swaggerDocs from "./swagger";
 
 export type ExpressServerAttr = {
-    AuthService: IAuthService;
-    ProfileService: IProfileService;
+    authService: IAuthService;
+    profileService: IProfileService;
 };
 
 export class ExpressServer {

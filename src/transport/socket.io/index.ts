@@ -3,15 +3,29 @@ import jwt from "jsonwebtoken";
 import { Server as SocketIOServer } from "socket.io";
 
 import { envVariables } from "@src/config";
-import { IRedisRepository, UserJwtPayload } from "@src/domain";
+import {
+    IMessagesService,
+    IRedisRepository,
+    UserJwtPayload,
+} from "@src/domain";
 import { log } from "@src/helpers";
+
+export type SocketIoServerAttr = {
+    redisRepository: IRedisRepository;
+    messageService: IMessagesService;
+};
 export class SocketIoServer {
     public io: SocketIOServer;
+    private readonly redisRepository: IRedisRepository;
+    private readonly messageService: IMessagesService;
+
     constructor(
         private readonly server: http.Server,
-        private readonly redisRepository: IRedisRepository,
-        private readonly messageService: IRedisRepository,
+        attrs: SocketIoServerAttr,
     ) {
+        this.redisRepository = attrs.redisRepository;
+        this.messageService = attrs.messageService;
+
         this.Init();
     }
     async Init() {

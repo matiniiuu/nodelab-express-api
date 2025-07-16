@@ -6,7 +6,9 @@ dotenv.config();
 import { envVariables } from "./config";
 import { log } from "./helpers";
 import { UserMongoDB } from "./repositories/mongodb";
+import { RedisAdapter } from "./repositories/redis";
 import { AuthService, ProfileService } from "./services";
+import { MessagesService } from "./services/messages.service";
 import { ExpressServer } from "./transport/express/server";
 import { SocketIoServer } from "./transport/socket.io";
 
@@ -22,18 +24,23 @@ import { SocketIoServer } from "./transport/socket.io";
             process.exit(1);
         }
 
+        const redisRepository = new RedisAdapter();
         const usersRepository = new UserMongoDB();
 
         const authService = new AuthService(usersRepository);
         const profileService = new ProfileService(usersRepository);
+        const messageService = new MessagesService(usersRepository);
 
         const expressServer = new ExpressServer({
-            AuthService: authService,
-            ProfileService: profileService,
+            authService: authService,
+            profileService: profileService,
         });
 
         expressServer.Start(+envVariables.PORT);
-        new SocketIoServer(expressServer.server);
+        new SocketIoServer(expressServer.server, {
+            redisRepository,
+            messageService,
+        });
         // process
         //     .on("SIGTERM", expressServer.Shutdown.bind(expressServer))
         //     .on("SIGINT", expressServer.Shutdown.bind(expressServer))
