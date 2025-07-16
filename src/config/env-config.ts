@@ -17,6 +17,8 @@ const config = {
 
     REDIS_URL: "REDIS_URL",
     REDIS_PASSWORD: "REDIS_PASSWORD",
+
+    RABBITMQ_URI: "RABBITMQ_URI",
 };
 const envSchema = joi
     .object({
@@ -54,6 +56,8 @@ const envSchema = joi
 
         [config.REDIS_URL]: joi.string().required(),
         [config.REDIS_PASSWORD]: joi.string().required(),
+
+        [config.RABBITMQ_URI]: joi.string().required(),
     })
     .unknown()
     .required();

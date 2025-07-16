@@ -1,6 +1,6 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose, { Document, Schema } from "mongoose";
 
-export interface IChat extends Document {
+export interface IChat extends Document<string> {
     participants: mongoose.Types.ObjectId[];
     lastMessage: mongoose.Types.ObjectId;
 }
@@ -26,4 +26,4 @@ const ChatSchema = new Schema<IChat>(
     },
 );
 
-export const ChatModel = mongoose.model<IChat>("Chat", ChatSchema);
+export const Chat = mongoose.model<IChat>("Chat", ChatSchema);

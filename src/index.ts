@@ -5,11 +5,19 @@ dotenv.config();
 
 import { envVariables } from "./config";
 import { log } from "./helpers";
-import { UserMongoDB } from "./repositories/mongodb";
+import {
+    ChatsMongoDB,
+    MessagesMongoDB,
+    UsersMongoDB,
+} from "./repositories/mongodb";
 import { RedisAdapter } from "./repositories/redis";
-import { AuthService, ProfileService } from "./services";
+import { AuthService, ChatsService, ProfileService } from "./services";
 import { MessagesService } from "./services/messages.service";
 import { ExpressServer } from "./transport/express/server";
+import {
+    ConsumerMessagesRabbitMQ,
+    ProducerMessagesRabbitMQ,
+} from "./transport/rabbitmq";
 import { SocketIoServer } from "./transport/socket.io";
 
 (async (): Promise<void> => {
@@ -24,12 +32,21 @@ import { SocketIoServer } from "./transport/socket.io";
             process.exit(1);
         }
 
+        const producerMessagesRabbitMQ = new ProducerMessagesRabbitMQ();
+
         const redisRepository = new RedisAdapter();
-        const usersRepository = new UserMongoDB();
+        const usersRepository = new UsersMongoDB();
+        const chatsRepository = new ChatsMongoDB();
+        const messagesRepository = new MessagesMongoDB();
 
         const authService = new AuthService(usersRepository);
         const profileService = new ProfileService(usersRepository);
-        const messageService = new MessagesService(usersRepository);
+        const chatsService = new ChatsService(chatsRepository);
+        const messageService = new MessagesService(
+            producerMessagesRabbitMQ,
+            messagesRepository,
+            chatsService,
+        );
 
         const expressServer = new ExpressServer({
             authService: authService,
@@ -41,6 +58,7 @@ import { SocketIoServer } from "./transport/socket.io";
             redisRepository,
             messageService,
         });
+        new ConsumerMessagesRabbitMQ().setupMessagesConsumers(messageService);
         // process
         //     .on("SIGTERM", expressServer.Shutdown.bind(expressServer))
         //     .on("SIGINT", expressServer.Shutdown.bind(expressServer))

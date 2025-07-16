@@ -1,5 +1,6 @@
-import { AutoMessageDto } from "@app/shared";
+import { PublishMessageDto, PublishReadReceiptDto } from "@src/dto";
 
-export interface IRepository {
-    insertMany(dto: AutoMessageDto[]): Promise<void>;
+export interface IMessagesRepository {
+    create(dto: PublishMessageDto): Promise<string>;
+    updateReadReceipt(dto: PublishReadReceiptDto): Promise<void>;
 }
