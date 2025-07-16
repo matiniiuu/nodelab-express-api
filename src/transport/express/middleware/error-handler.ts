@@ -14,6 +14,8 @@ export const errorHandler = (
     }
 
     res.status(500).send({
-        errors: [{ message: err.message }],
+        errors: [
+            { message: `SentryId: ${(res as any).sentry},${err.message}` },
+        ],
     });
 };

@@ -1,14 +1,17 @@
+import * as Sentry from "@sentry/node";
+
 import cors from "cors";
 import express from "express";
 import helmet from "helmet";
 import http from "http";
 
+import { envVariables } from "@src/config";
 import { IAuthService, IProfileService } from "@src/domain";
-import { NotFoundException } from "@src/packages";
-
 import { log } from "@src/helpers";
+import { NotFoundException } from "@src/packages";
 import { errorHandler } from "./middleware/error-handler";
 import { morganMiddleware } from "./middleware/morgan";
+import { limiter } from "./middleware/rate-limit";
 import { createRoutes } from "./routes";
 import swaggerDocs from "./swagger";
 
@@ -26,6 +29,12 @@ export class ExpressServer {
     server: http.Server = http.createServer(this.app);
 
     Init() {
+        Sentry.init({
+            dsn: envVariables.SENTRY_DSN,
+            tracesSampleRate: 1.0,
+            sendDefaultPii: true,
+        });
+
         this.app.use(helmet());
         this.use(
             cors({
@@ -36,12 +45,13 @@ export class ExpressServer {
         );
         this.app.use(express.json());
         this.app.use(morganMiddleware);
-
+        this.app.use(limiter);
         this.app.use("/v1", createRoutes(this.attrs));
         swaggerDocs(this.app);
         this.app.all(/(.*)/, async () => {
             throw new NotFoundException();
         });
+        Sentry.setupExpressErrorHandler(this.app);
         this.app.use(errorHandler);
     }
     private use(middleware: any) {
