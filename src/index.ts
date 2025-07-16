@@ -4,16 +4,22 @@ import "reflect-metadata";
 dotenv.config();
 
 import { envVariables } from "./config";
+import { log } from "./helpers";
 import { UserMongoDB } from "./repositories/mongodb";
 import { AuthService, ProfileService } from "./services";
 import { ExpressServer } from "./transport/express/server";
 
 (async (): Promise<void> => {
     try {
-        await mongoose.connect(envVariables.MONGODB_DB_URL, {
-            dbName: envVariables.MONGODB_DB_NAME,
-        });
-        console.log("Mongodb Connected!");
+        try {
+            await mongoose.connect(envVariables.MONGODB_DB_URL, {
+                dbName: envVariables.MONGODB_DB_NAME,
+            });
+            log.info("DB connected");
+        } catch (error) {
+            log.error("Could not connect to db");
+            process.exit(1);
+        }
 
         const usersRepository = new UserMongoDB();
 
@@ -24,7 +30,6 @@ import { ExpressServer } from "./transport/express/server";
             AuthService: authService,
             ProfileService: profileService,
         });
-        console.log(envVariables.PORT);
 
         expressServer.Start(+envVariables.PORT);
         // process
@@ -35,6 +40,6 @@ import { ExpressServer } from "./transport/express/server";
         //         expressServer.Shutdown.bind(expressServer),
         //     );
     } catch (error) {
-        console.log(error);
+        log.error(error);
     }
 })();

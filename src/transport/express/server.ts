@@ -6,8 +6,10 @@ import http from "http";
 import { IAuthService, IProfileService } from "@src/domain";
 import { NotFoundException } from "@src/packages";
 
+import { log } from "@src/helpers";
 import { errorHandler } from "./middleware/error-handler";
 import { createRoutes } from "./routes";
+import swaggerDocs from "./swagger";
 
 export type ExpressServerAttr = {
     AuthService: IAuthService;
@@ -33,6 +35,7 @@ export class ExpressServer {
         );
         this.app.use(express.json());
         this.app.use("/v1", createRoutes(this.attrs));
+        swaggerDocs(this.app);
         this.app.all(/(.*)/, async () => {
             throw new NotFoundException();
         });
@@ -43,14 +46,12 @@ export class ExpressServer {
     }
     Start(port: number) {
         this.server.listen(port, () => {
-            console.log(`Listening on port ${port}`);
+            log.info(`Listening on port ${port}`);
         });
     }
     Shutdown() {
-        console.log("Received kill signal, shutting down gracefully");
-        this.server.close(() =>
-            console.log("Closed out remaining connections"),
-        );
+        log.info("Received kill signal, shutting down gracefully");
+        this.server.close(() => log.info("Closed out remaining connections"));
         setTimeout(() => {
             console.error(
                 "Could not close connections in time, forcefully shutting down",
