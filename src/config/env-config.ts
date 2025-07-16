@@ -23,7 +23,7 @@ const envSchema = joi
         [config.NODE_ENV]: joi
             .string()
             .allow("development", "production", "test")
-            .default("production"),
+            .default("development"),
         [config.LOGGER_LEVEL]: joi
             .string()
             .allow("test", "error", "warn", "info", "verbose", "debug", "silly")

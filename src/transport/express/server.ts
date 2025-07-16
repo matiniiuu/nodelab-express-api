@@ -8,6 +8,7 @@ import { NotFoundException } from "@src/packages";
 
 import { log } from "@src/helpers";
 import { errorHandler } from "./middleware/error-handler";
+import { morganMiddleware } from "./middleware/morgan";
 import { createRoutes } from "./routes";
 import swaggerDocs from "./swagger";
 
@@ -34,6 +35,8 @@ export class ExpressServer {
             }),
         );
         this.app.use(express.json());
+        this.app.use(morganMiddleware);
+
         this.app.use("/v1", createRoutes(this.attrs));
         swaggerDocs(this.app);
         this.app.all(/(.*)/, async () => {
