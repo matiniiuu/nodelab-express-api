@@ -14,6 +14,9 @@ const config = {
     JWT_REFRESH_EXPIRATION_TIME: "JWT_REFRESH_EXPIRATION_TIME",
 
     SENTRY_DSN: "SENTRY_DSN",
+
+    REDIS_URL: "REDIS_URL",
+    REDIS_PASSWORD: "REDIS_PASSWORD",
 };
 const envSchema = joi
     .object({
@@ -48,6 +51,9 @@ const envSchema = joi
         [config.JWT_REFRESH_EXPIRATION_TIME]: joi.string().required(),
 
         [config.SENTRY_DSN]: joi.string().required(),
+
+        [config.REDIS_URL]: joi.string().required(),
+        [config.REDIS_PASSWORD]: joi.string().required(),
     })
     .unknown()
     .required();
