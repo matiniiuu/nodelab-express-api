@@ -1,10 +1,10 @@
 import { Response } from "express";
 import { Send } from "express-serve-static-core";
-import { HttpResponse } from "../constants";
 
+import { DataResponse, SuccessResponse } from "@src/dto";
 export interface TypedResponse<ResBody> extends Response {
-    json: Send<ResBody, this>;
+    json: Send<DataResponse<ResBody>, this>;
 }
 export interface StandardResponse extends Response {
-    json: Send<HttpResponse, this>;
+    json: Send<SuccessResponse, this>;
 }

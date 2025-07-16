@@ -1,5 +1,5 @@
 import { ValidationError } from "class-validator";
-import { CustomError } from "./custom-error";
+import { CustomError } from "./custom-exception";
 
 export class RequestValidationError extends CustomError {
     statusCode = 400;

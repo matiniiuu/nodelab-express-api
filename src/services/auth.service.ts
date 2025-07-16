@@ -1,106 +1,53 @@
-import { camelCase } from "lodash";
+import jwt from "jsonwebtoken";
+
+import { envVariables, InvalidEmailOrPassword, ItemCreated } from "@src/config";
+import { IAuthService, IUserRepository, UserJwtPayload } from "@src/domain";
 import {
-    AuthTokensResponse,
-    ForgotPasswordRequest,
-    ResetPasswordRequest,
-    SignInRequest,
-    SignUpRequest,
-    SocialSignInRequest,
-} from "../dto";
-import { RequiredVerificationField } from "../enums";
-import { phoneNumberPreprocessing } from "../helpers/user";
-import {
-    changePassword,
-    forgotPassword,
-    getUser,
-    getVerificationCode,
-    refreshToken,
-    signIn,
-    signOut,
-    signUp,
-    socialSignIn,
-    verifyAttribute,
-} from "../libraries/aws";
-import { IUsersRepository } from "../repositories";
+    DataReply,
+    DataResponse,
+    LoginResponse,
+    LoginUserDto,
+    RegisterUserDto,
+    SuccessReply,
+    SuccessResponse,
+} from "@src/dto";
+import { NotFoundException } from "@src/packages";
 
 export class AuthService implements IAuthService {
-    constructor(private readonly usersRepository: IUsersRepository) {}
-    async signUp(user: SignUpRequest): Promise<AuthTokensResponse> {
-        user.phoneNumber = phoneNumberPreprocessing(user.phoneNumber);
-        const tokens = await signUp(user);
-        await this.usersRepository.create(await getUser(user.email));
-        return tokens;
+    constructor(private readonly userRepository: IUserRepository) {}
+    async register(dto: RegisterUserDto): SuccessReply {
+        await this.userRepository.create(dto);
+        return new SuccessResponse(ItemCreated);
     }
-    async signIn(user: SignInRequest): Promise<AuthTokensResponse> {
-        return signIn(user);
-    }
-    async socialSignIn(user: SocialSignInRequest): Promise<AuthTokensResponse> {
-        const result = await socialSignIn(user);
-        if (result.newUser) {
-            await this.usersRepository.create(await getUser(result.email));
+
+    async login({ email, password }: LoginUserDto): DataReply<LoginResponse> {
+        const user = await this.userRepository.profile(email);
+        if (!user) {
+            throw new NotFoundException(InvalidEmailOrPassword);
         }
-        return result.tokens;
-    }
+        const isPasswordsMatch = await user.comparePassword(password);
+        if (!isPasswordsMatch) {
+            throw new NotFoundException(InvalidEmailOrPassword);
+        }
+        const tokenPayload = new UserJwtPayload(user.email, user._id);
 
-    async getVerificationCode(
-        field: RequiredVerificationField,
-        accessToken: string,
-    ): Promise<void> {
-        return getVerificationCode(field, accessToken);
-    }
-
-    async verifyAttribute(
-        email: string,
-        field: RequiredVerificationField,
-        accessToken: string,
-        code: number,
-    ): Promise<void> {
-        await verifyAttribute(field, accessToken, code);
-        await this.usersRepository.verifyAttribute(
-            email,
-            `${camelCase(field)}Verified`,
+        return new DataResponse(
+            new LoginResponse(
+                this.generateAccessToken(tokenPayload),
+                this.generateRefreshToken(tokenPayload),
+            ),
         );
     }
-
-    async refreshToken(
-        email: string,
-        token: string,
-    ): Promise<AuthTokensResponse> {
-        return refreshToken(email, token);
+    generateAccessToken({ tokenPayload }: UserJwtPayload): string {
+        return jwt.sign(tokenPayload, envVariables.JWT_ACCESS_SECRET, {
+            expiresIn:
+                envVariables.JWT_ACCESS_EXPIRATION_TIME as jwt.SignOptions["expiresIn"],
+        });
     }
-
-    async signOut(token: string): Promise<void> {
-        return signOut(token);
+    generateRefreshToken({ tokenPayload }: UserJwtPayload): string {
+        return jwt.sign(tokenPayload, envVariables.JWT_ACCESS_SECRET, {
+            expiresIn:
+                envVariables.JWT_ACCESS_EXPIRATION_TIME as jwt.SignOptions["expiresIn"],
+        });
     }
-
-    async forgotPassword(forgotPasswordParam: ForgotPasswordRequest) {
-        await forgotPassword(forgotPasswordParam);
-    }
-    async resetPassword(resetPassword: ResetPasswordRequest) {
-        await changePassword(resetPassword);
-    }
-}
-
-export interface IAuthService {
-    signUp(user: SignUpRequest): Promise<AuthTokensResponse>;
-    signIn(user: SignInRequest): Promise<AuthTokensResponse>;
-    socialSignIn(user: SocialSignInRequest): Promise<AuthTokensResponse>;
-
-    getVerificationCode(
-        field: RequiredVerificationField,
-        accessToken: string,
-    ): Promise<void>;
-
-    verifyAttribute(
-        email: string,
-        field: RequiredVerificationField,
-        accessToken: string,
-        code: number,
-    ): Promise<void>;
-    refreshToken(email: string, token: string): Promise<AuthTokensResponse>;
-
-    signOut(token: string): Promise<void>;
-
-    forgotPassword(forgotPasswordParam: ForgotPasswordRequest);
-    resetPassword(resetPassword: ResetPasswordRequest);
 }

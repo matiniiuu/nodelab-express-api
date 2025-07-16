@@ -1,12 +1,11 @@
 import { Request } from "express";
-import { ParsedQs } from "qs";
 import { ParamsDictionary, Query } from "express-serve-static-core";
-import { CognitoAccessTokenPayload } from "aws-jwt-verify/jwt-model";
 
+import { UserJwtPayload } from "@src/domain";
 declare global {
     namespace Express {
         interface Request {
-            user?: CognitoAccessTokenPayload;
+            user?: UserJwtPayload;
             accessToken: string;
             refreshToken: string;
         }

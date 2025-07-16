@@ -1,12 +1,12 @@
 import "core-js/features/array/at";
 
-import { v4 as uuid } from "uuid";
 import eFileUpload from "express-fileupload";
+import { v4 as uuid } from "uuid";
 
-import { uploadObject } from "../libraries/aws";
 import config from "../config";
-import { BadRequestError } from "../packages/errors/bad-request-error";
 import { invalidFileType } from "../constants";
+import { uploadObject } from "../libraries/aws";
+import { BadRequestError } from "../packages/errors/bad-request-error";
 
 const generateFilename = (originalFilename: string): string => {
     return `${uuid()}.${originalFilename.split(".").at(-1)}`;

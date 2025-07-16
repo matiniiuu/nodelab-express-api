@@ -1,47 +1,16 @@
-import { Type } from "class-transformer";
-import {
-    IsEnum,
-    IsInt,
-    IsJWT,
-    IsNotEmpty,
-    IsOptional,
-    IsPhoneNumber,
-    IsString,
-    MinLength,
-} from "class-validator";
-import { Email, Password, PhoneNumber } from "./index";
-import { IdentityProvider } from "../enums";
-import { invalidIdentityProvider } from "../constants";
-export class SignUpRequest extends PhoneNumber(Email(Password(class {}))) {
-    @IsString()
-    @MinLength(3)
-    firstName: string;
+import { IsRequiredEmail, IsRequiredString } from "./decorators";
 
-    @IsString()
-    lastName: string;
-}
-export class SignInRequest extends Email(Password(class {})) {}
-export class SocialSignInRequest {
-    @IsEnum(IdentityProvider, { message: invalidIdentityProvider })
-    identityProvider: IdentityProvider;
-
-    @IsJWT()
-    token: string;
+export class RegisterUserDto {
+    @IsRequiredString() name: string;
+    @IsRequiredEmail() email: string;
+    @IsRequiredString() password: string;
 }
 
-export class VerifyRequest {
-    @IsInt()
-    @Type(() => Number)
-    code: number;
-}
-export class ForgotPasswordRequest extends Email(class {}) {}
-export class ResetPasswordRequest extends Email(Password(class {})) {
-    @IsInt()
-    @Type(() => Number)
-    code: number;
+export class LoginUserDto {
+    @IsRequiredString() email: string;
+    @IsRequiredString() password: string;
 }
 
-export class AuthTokensResponse {
-    accessToken: string;
-    refreshToken: string;
+export class UpdateProfileDto {
+    @IsRequiredString() name: string;
 }

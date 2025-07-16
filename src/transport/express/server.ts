@@ -4,17 +4,14 @@ import "express-async-errors";
 import eFileUpload from "express-fileupload";
 import http from "http";
 
-import { NotFoundError } from "../../packages/errors/not-found-error";
-import { IAuthService, IContactsService, IUsersService } from "../../services";
-import { IChallengesService } from "../../services/challenges.service";
+import { IAuthService } from "@src/domain";
+import { NotFoundException } from "@src/packages";
+
 import { errorHandler } from "./middleware/error-handler";
 import { createRoutes } from "./routes";
 
 export type ExpressServerAttr = {
     AuthService: IAuthService;
-    UsersService: IUsersService;
-    ContactsService: IContactsService;
-    ChallengesService: IChallengesService;
 };
 
 export class ExpressServer {
@@ -37,7 +34,7 @@ export class ExpressServer {
         this.app.use(eFileUpload());
         this.app.use("/v1", createRoutes(this.attrs));
         this.app.all("*", async () => {
-            throw new NotFoundError();
+            throw new NotFoundException();
         });
         this.app.use(errorHandler);
     }

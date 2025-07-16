@@ -5,6 +5,10 @@
         "esModuleInterop": true,
         "outDir": "./dist",
         "emitDecoratorMetadata": true,
-        "experimentalDecorators": true
+        "experimentalDecorators": true,
+        "paths": {
+            "@src": ["./src"],
+            "@src/*": ["./src/*"]
+        }
     }
 }

@@ -1,5 +1,5 @@
 import { AuthorizationFailed } from "../../constants";
-import { CustomError } from "./custom-error";
+import { CustomError } from "./custom-exception";
 
 export class NotAuthorizedError extends CustomError {
     statusCode = 403;

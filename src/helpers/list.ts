@@ -1,4 +1,4 @@
-import { SortOrder } from "../enums";
+import { SortOrder } from "../domain/enums";
 
 export const calculateOffset = (page: number, limit: number): number => {
     return (page - 1) * limit;

@@ -2,14 +2,13 @@ import { Type } from "class-transformer";
 import {
     IsEnum,
     IsInt,
-    IsNotEmpty,
     IsNotEmptyObject,
     IsOptional,
     IsString,
     IsUUID,
 } from "class-validator";
 import { ListRequest } from ".";
-import { ContactsStatus } from "../enums";
+import { ContactsStatus } from "../domain/enums";
 
 export class ContactsRequest {
     @IsUUID()

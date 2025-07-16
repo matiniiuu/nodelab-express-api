@@ -4,7 +4,7 @@ import { ContactsListRequest, ContactsSuggestionsRequest } from "../dto";
 import { Contact, NewContactAttr, User } from "../entities";
 import { ContactsStatus } from "../enums";
 import { calculateOffset, transformSort } from "../helpers/list";
-import { NotFoundError } from "../packages/errors/not-found-error";
+import { NotFoundError } from "../packages/errors/not-found-exception";
 
 export class ContactsRepository implements IContactsRepository {
     contactRepository: Repository<Contact>;

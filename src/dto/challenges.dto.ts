@@ -7,7 +7,7 @@ import {
     MinLength,
 } from "class-validator";
 import { ListRequest } from ".";
-import { ChallengeStatus } from "../enums";
+import { ChallengeStatus } from "../domain/enums";
 
 export class ChallengesRequest {
     @IsUUID()

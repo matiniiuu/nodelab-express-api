@@ -1,4 +1,4 @@
-import { CustomError } from "./custom-error";
+import { CustomError } from "./custom-exception";
 
 export class AwsError extends CustomError {
     statusCode = 500;
