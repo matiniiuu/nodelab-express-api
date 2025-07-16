@@ -1,14 +1,14 @@
 import { ValidationError } from "class-validator";
-import { CustomError } from "./custom-exception";
+import { CustomException } from "./custom-exception";
 
-export class RequestValidationError extends CustomError {
+export class RequestValidationException extends CustomException {
     statusCode = 400;
 
     constructor(public errors: ValidationError[]) {
         super("Invalid request parameters");
 
         // Only because we are extending a built in class
-        Object.setPrototypeOf(this, RequestValidationError.prototype);
+        Object.setPrototypeOf(this, RequestValidationException.prototype);
     }
 
     serializeErrors() {

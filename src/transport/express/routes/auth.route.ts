@@ -9,22 +9,22 @@ import { validator } from "../middleware/validation";
 
 export const createAuthRoutes = (authService: IAuthService): express.Router => {
     const router = express.Router();
-    const authController = new AuthController(authService);
+    const controller = new AuthController(authService);
     router.post(
         "/register",
         validator(RegisterUserDto, "body"),
-        authController.register.bind(authController),
+        controller.register.bind(controller),
     );
     router.post(
         "/login",
         validator(LoginUserDto, "body"),
-        authController.login.bind(authController),
+        controller.login.bind(controller),
     );
 
     router.post(
         "/refresh",
         authentication(true),
-        authController.refresh.bind(authController),
+        controller.refresh.bind(controller),
     );
 
     return router;

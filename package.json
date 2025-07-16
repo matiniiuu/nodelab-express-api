@@ -5,7 +5,7 @@
     "main": "index.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
-        "dev": "ts-node-dev src/index.ts",
+        "dev": "ts-node-dev --respawn --transpile-only -r tsconfig-paths/register src/index.ts",
         "start": "node dist/index.js",
         "build": "rm -rf dist && ./node_modules/typescript/bin/tsc -p ./tsconfig.json"
     },
@@ -35,35 +35,21 @@
         "typescript": "^5.8.3"
     },
     "dependencies": {
-        "amazon-cognito-identity-js": "^6.3.15",
-        "aws-jwt-verify": "^5.1.0",
-        "aws-sdk": "^2.1692.0",
         "bcrypt": "^6.0.0",
         "class-sanitizer": "^1.0.1",
         "class-transformer": "^0.5.1",
         "class-validator": "^0.14.2",
-        "cookie-parser": "^1.4.7",
-        "core-js": "^3.44.0",
         "cors": "^2.8.5",
         "dotenv": "^17.2.0",
-        "env-cmd": "^10.1.0",
         "express": "^5.1.0",
-        "express-async-errors": "^3.1.1",
-        "express-fileupload": "^1.5.2",
-        "express-validator": "^7.2.1",
-        "google-auth-library": "^10.1.0",
+        "helmet": "^8.1.0",
         "http-status": "^2.1.0",
         "joi": "^17.13.3",
         "jsonwebtoken": "^9.0.2",
-        "jwk-to-pem": "^2.0.7",
-        "lodash": "^4.17.21",
         "mongoose": "^8.16.3",
-        "nodemon": "^3.1.10",
-        "pg": "^8.16.3",
         "reflect-metadata": "^0.2.2",
-        "request": "^2.88.2",
+        "socket.io": "^4.8.1",
         "swagger-ui-express": "^5.0.1",
-        "typeorm": "^0.3.25",
         "winston": "^3.17.0"
     }
 }

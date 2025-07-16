@@ -6,6 +6,7 @@ export const ArrayMin = (propertyKey: string) => {
 };
 
 //* general Errors
+export const DataRequired = "DataRequired";
 export const NotFound = "NotFound";
 export const NotAuthorized = "NotAuthorized";
 export const InvalidEmailOrPassword = "InvalidEmailOrPassword";

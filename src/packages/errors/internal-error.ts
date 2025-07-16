@@ -1,6 +1,6 @@
-import { CustomError } from "./custom-exception";
+import { CustomException } from "./custom-exception";
 
-export class InternalError extends CustomError {
+export class InternalError extends CustomException {
     statusCode = 500;
 
     constructor(message: string = "SomethingWentWrong") {

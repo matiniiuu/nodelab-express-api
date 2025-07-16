@@ -1,10 +1,9 @@
 import cors from "cors";
 import express from "express";
-import "express-async-errors";
-import eFileUpload from "express-fileupload";
+import helmet from "helmet";
 import http from "http";
 
-import { IAuthService } from "@src/domain";
+import { IAuthService, IProfileService } from "@src/domain";
 import { NotFoundException } from "@src/packages";
 
 import { errorHandler } from "./middleware/error-handler";
@@ -12,6 +11,7 @@ import { createRoutes } from "./routes";
 
 export type ExpressServerAttr = {
     AuthService: IAuthService;
+    ProfileService: IProfileService;
 };
 
 export class ExpressServer {
@@ -23,6 +23,7 @@ export class ExpressServer {
     server: http.Server = http.createServer(this.app);
 
     Init() {
+        this.app.use(helmet());
         this.use(
             cors({
                 origin: "*",
@@ -31,9 +32,8 @@ export class ExpressServer {
             }),
         );
         this.app.use(express.json());
-        this.app.use(eFileUpload());
         this.app.use("/v1", createRoutes(this.attrs));
-        this.app.all("*", async () => {
+        this.app.all(/(.*)/, async () => {
             throw new NotFoundException();
         });
         this.app.use(errorHandler);

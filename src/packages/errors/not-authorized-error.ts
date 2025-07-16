@@ -1,7 +1,7 @@
 import { AuthorizationFailed } from "../../constants";
-import { CustomError } from "./custom-exception";
+import { CustomException } from "./custom-exception";
 
-export class NotAuthorizedError extends CustomError {
+export class NotAuthorizedError extends CustomException {
     statusCode = 403;
     constructor() {
         super(AuthorizationFailed);

@@ -1,19 +1,29 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, SchemaTypes } from 'mongoose';
+import mongoose, { Schema } from "mongoose";
 
-import { defaultSchemaOptions } from '../helpers';
-
-@Schema(defaultSchemaOptions())
-export class Chat extends Document<string> {
-    @Prop({ type: String, required: true }) from: string;
-    @Prop({ type: String, required: true }) to: string;
-    @Prop({
-        type: SchemaTypes.ObjectId,
-        ref: 'Message',
-        required: true,
-    })
-    lastMessageId?: string;
-    lastMessage?: Chat;
+export interface IChat extends Document {
+    participants: mongoose.Types.ObjectId[];
+    lastMessage: mongoose.Types.ObjectId;
 }
 
-export const ChatSchema = SchemaFactory.createForClass(Chat);
+const ChatSchema = new Schema<IChat>(
+    {
+        participants: [
+            { type: Schema.Types.ObjectId, ref: "User", required: true },
+        ],
+        lastMessage: {
+            type: Schema.Types.ObjectId,
+            ref: "Chat",
+            required: true,
+        },
+    },
+    {
+        timestamps: true,
+        toJSON: {
+            transform(doc, ret) {
+                delete ret.__v;
+            },
+        },
+    },
+);
+
+export const ChatModel = mongoose.model<IChat>("Chat", ChatSchema);

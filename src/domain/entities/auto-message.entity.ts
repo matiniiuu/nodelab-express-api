@@ -1,21 +1,30 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import mongoose, { Schema } from "mongoose";
 
-import { defaultSchemaOptions } from '../helpers';
-
-@Schema(defaultSchemaOptions())
-export class AutoMessage extends Document<string> {
-    @Prop({ required: true })
-    senderId: string;
-
-    @Prop({ required: true })
-    receiverId: string;
-
-    @Prop({ required: true })
+export interface IAutoMessage extends Document {
+    sender: mongoose.Types.ObjectId;
+    receiver: mongoose.Types.ObjectId;
     message: string;
-
-    @Prop({ required: true })
     sendDate: Date;
 }
 
-export const AutoMessageSchema = SchemaFactory.createForClass(AutoMessage);
+const AutoMessageSchema = new Schema<IAutoMessage>(
+    {
+        sender: { type: Schema.Types.ObjectId, ref: "User", required: true },
+        receiver: { type: Schema.Types.ObjectId, ref: "User", required: true },
+        message: { type: String, required: true },
+        sendDate: { type: Date, required: true },
+    },
+    {
+        timestamps: true,
+        toJSON: {
+            transform(doc, ret) {
+                delete ret.__v;
+            },
+        },
+    },
+);
+
+export const AutoMessageModel = mongoose.model<IAutoMessage>(
+    "AutoMessage",
+    AutoMessageSchema,
+);

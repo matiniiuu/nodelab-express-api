@@ -1,6 +1,6 @@
-import { CustomError } from "./custom-exception";
+import { CustomException } from "./custom-exception";
 
-export class AwsError extends CustomError {
+export class AwsError extends CustomException {
     statusCode = 500;
 
     constructor(statusCode: number, message: string) {

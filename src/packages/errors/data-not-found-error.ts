@@ -1,6 +1,6 @@
-import { CustomError } from "./custom-exception";
+import { CustomException } from "./custom-exception";
 
-export class DataNotFoundError extends CustomError {
+export class DataNotFoundError extends CustomException {
     statusCode = 404;
 
     constructor(public message: string) {

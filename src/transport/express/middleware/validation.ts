@@ -1,14 +1,18 @@
-import { plainToClass, plainToInstance } from "class-transformer";
-import { validate, ValidationError } from "class-validator";
-import { Request, Response, NextFunction, RequestHandler } from "express";
 import { sanitize } from "class-sanitizer";
-import { RequestValidationError } from "../../../packages/errors/request-validation-error";
+import { plainToInstance } from "class-transformer";
+import { validate } from "class-validator";
+import { NextFunction, Request, RequestHandler, Response } from "express";
+
+import { RequestValidationException } from "@src/packages";
 
 export const validator = (
     schema: any,
     reqSection: "body" | "query" | "params",
 ): RequestHandler => {
     return async (req: Request, res: Response, next: NextFunction) => {
+        if (!req[reqSection]) {
+            req[reqSection] = {};
+        }
         const dtoObj = plainToInstance(schema, req[reqSection]);
         const errors = await validate(dtoObj);
         if (!errors.length) {
@@ -17,6 +21,6 @@ export const validator = (
             req[reqSection] = dtoObj;
             return next();
         }
-        throw new RequestValidationError(errors);
+        throw new RequestValidationException(errors);
     };
 };

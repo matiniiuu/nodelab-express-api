@@ -29,23 +29,22 @@ export class AuthService implements IAuthService {
         if (!isPasswordsMatch) {
             throw new NotFoundException(InvalidEmailOrPassword);
         }
-        const tokenPayload = new UserJwtPayload(user.email, user._id);
 
         return new DataResponse(
             new LoginResponse(
-                this.generateAccessToken(tokenPayload),
-                this.generateRefreshToken(tokenPayload),
+                this.generateAccessToken({ email, id: user._id }),
+                this.generateRefreshToken({ email, id: user._id }),
             ),
         );
     }
-    generateAccessToken({ tokenPayload }: UserJwtPayload): string {
-        return jwt.sign(tokenPayload, envVariables.JWT_ACCESS_SECRET, {
+    generateAccessToken({ email, id }: UserJwtPayload): string {
+        return jwt.sign({ email, id }, envVariables.JWT_ACCESS_SECRET, {
             expiresIn:
                 envVariables.JWT_ACCESS_EXPIRATION_TIME as jwt.SignOptions["expiresIn"],
         });
     }
-    generateRefreshToken({ tokenPayload }: UserJwtPayload): string {
-        return jwt.sign(tokenPayload, envVariables.JWT_ACCESS_SECRET, {
+    generateRefreshToken({ email, id }: UserJwtPayload): string {
+        return jwt.sign({ email, id }, envVariables.JWT_ACCESS_SECRET, {
             expiresIn:
                 envVariables.JWT_ACCESS_EXPIRATION_TIME as jwt.SignOptions["expiresIn"],
         });

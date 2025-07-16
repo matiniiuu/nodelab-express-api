@@ -1,6 +1,6 @@
-import { CustomError } from "./custom-exception";
+import { CustomException } from "./custom-exception";
 
-export class BadRequestError extends CustomError {
+export class BadRequestError extends CustomException {
     statusCode = 400;
 
     constructor(public message: string) {
