@@ -1,11 +1,11 @@
-import * as Sentry from "@sentry/node";
+import "./instrument";
 
+import * as Sentry from "@sentry/node";
 import cors from "cors";
 import express from "express";
 import helmet from "helmet";
 import http from "http";
 
-import { envVariables } from "@src/config";
 import { IAuthService, IProfileService } from "@src/domain";
 import { log } from "@src/helpers";
 import { NotFoundException } from "@src/packages";
@@ -29,12 +29,6 @@ export class ExpressServer {
     server: http.Server = http.createServer(this.app);
 
     Init() {
-        Sentry.init({
-            dsn: envVariables.SENTRY_DSN,
-            tracesSampleRate: 1.0,
-            sendDefaultPii: true,
-        });
-
         this.app.use(helmet());
         this.use(
             cors({
@@ -71,5 +65,8 @@ export class ExpressServer {
             );
             process.exit(1);
         }, 10000);
+    }
+    get serverInstance(): http.Server {
+        return this.server;
     }
 }

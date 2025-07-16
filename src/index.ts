@@ -8,6 +8,7 @@ import { log } from "./helpers";
 import { UserMongoDB } from "./repositories/mongodb";
 import { AuthService, ProfileService } from "./services";
 import { ExpressServer } from "./transport/express/server";
+import { SocketIoServer } from "./transport/socket.io";
 
 (async (): Promise<void> => {
     try {
@@ -32,6 +33,7 @@ import { ExpressServer } from "./transport/express/server";
         });
 
         expressServer.Start(+envVariables.PORT);
+        new SocketIoServer(expressServer.server);
         // process
         //     .on("SIGTERM", expressServer.Shutdown.bind(expressServer))
         //     .on("SIGINT", expressServer.Shutdown.bind(expressServer))
