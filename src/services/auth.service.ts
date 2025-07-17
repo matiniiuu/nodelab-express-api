@@ -1,10 +1,8 @@
 import jwt from "jsonwebtoken";
 
 import { envVariables, InvalidEmailOrPassword, ItemCreated } from "@src/config";
-import { IAuthService, IUserRepository, UserJwtPayload } from "@src/domain";
+import { IAuthService, IUsersRepository, UserJwtPayload } from "@src/domain";
 import {
-    DataReply,
-    DataResponse,
     LoginResponse,
     LoginUserDto,
     RegisterUserDto,
@@ -14,13 +12,13 @@ import {
 import { NotFoundException } from "@src/packages";
 
 export class AuthService implements IAuthService {
-    constructor(private readonly userRepository: IUserRepository) {}
+    constructor(private readonly userRepository: IUsersRepository) {}
     async register(dto: RegisterUserDto): SuccessReply {
         await this.userRepository.create(dto);
         return new SuccessResponse(ItemCreated);
     }
 
-    async login({ email, password }: LoginUserDto): DataReply<LoginResponse> {
+    async login({ email, password }: LoginUserDto): Promise<LoginResponse> {
         const user = await this.userRepository.profile(email);
         if (!user) {
             throw new NotFoundException(InvalidEmailOrPassword);
@@ -30,11 +28,9 @@ export class AuthService implements IAuthService {
             throw new NotFoundException(InvalidEmailOrPassword);
         }
 
-        return new DataResponse(
-            new LoginResponse(
-                this.generateAccessToken({ email, id: user._id }),
-                this.generateRefreshToken({ email, id: user._id }),
-            ),
+        return new LoginResponse(
+            this.generateAccessToken({ email, id: user._id }),
+            this.generateRefreshToken({ email, id: user._id }),
         );
     }
     generateAccessToken({ email, id }: UserJwtPayload): string {

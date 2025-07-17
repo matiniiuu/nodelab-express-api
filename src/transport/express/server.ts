@@ -1,23 +1,25 @@
 import "./instrument";
 
 import * as Sentry from "@sentry/node";
+import cookieSession from "cookie-session";
 import cors from "cors";
 import express from "express";
 import helmet from "helmet";
 import http from "http";
 
-import { IAuthService, IProfileService } from "@src/domain";
+import { IAuthService, IChatsService, IProfileService } from "@src/domain";
 import { log } from "@src/helpers";
 import { NotFoundException } from "@src/packages";
 import { errorHandler } from "./middleware/error-handler";
 import { morganMiddleware } from "./middleware/morgan";
-import { limiter } from "./middleware/rate-limit";
+import { getLimiter } from "./middleware/rate-limit";
 import { createRoutes } from "./routes";
 import swaggerDocs from "./swagger";
 
 export type ExpressServerAttr = {
     authService: IAuthService;
     profileService: IProfileService;
+    chatsService: IChatsService;
 };
 
 export class ExpressServer {
@@ -28,7 +30,7 @@ export class ExpressServer {
     app = express();
     server: http.Server = http.createServer(this.app);
 
-    Init() {
+    async Init() {
         this.app.use(helmet());
         this.use(
             cors({
@@ -38,9 +40,18 @@ export class ExpressServer {
             }),
         );
         this.app.use(express.json());
+        this.app.use(
+            cookieSession({
+                signed: false,
+            }),
+        );
         this.app.use(morganMiddleware);
+        //! Rate Limiter
+        const limiter = await getLimiter();
         this.app.use(limiter);
-        this.app.use("/v1", createRoutes(this.attrs));
+        //! Routes
+        const routes = await createRoutes(this.attrs);
+        this.app.use("/v1", routes);
         swaggerDocs(this.app);
         this.app.all(/(.*)/, async () => {
             throw new NotFoundException();

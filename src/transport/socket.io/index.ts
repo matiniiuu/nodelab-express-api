@@ -1,36 +1,38 @@
 import http from "http";
 import jwt from "jsonwebtoken";
-import { Server as SocketIOServer } from "socket.io";
+import { Server as SocketIO } from "socket.io";
 
 import { envVariables } from "@src/config";
 import {
+    IAutoMessage,
     IMessagesService,
     IRedisRepository,
     UserJwtPayload,
 } from "@src/domain";
 import { log } from "@src/helpers";
+import { eventBus } from "../event-bus";
 
 export type SocketIoServerAttr = {
     redisRepository: IRedisRepository;
-    messageService: IMessagesService;
+    messagesService: IMessagesService;
 };
 export class SocketIoServer {
-    public io: SocketIOServer;
+    public io: SocketIO;
     private readonly redisRepository: IRedisRepository;
-    private readonly messageService: IMessagesService;
+    private readonly messagesService: IMessagesService;
 
     constructor(
         private readonly server: http.Server,
         attrs: SocketIoServerAttr,
     ) {
         this.redisRepository = attrs.redisRepository;
-        this.messageService = attrs.messageService;
+        this.messagesService = attrs.messagesService;
 
         this.Init();
     }
     async Init() {
         log.info("Initializing Socket");
-        this.io = new SocketIOServer(this.server, {
+        this.io = new SocketIO(this.server, {
             cors: { origin: "*" },
             adapter: await this.redisRepository.socketAdapter(),
         });
@@ -86,13 +88,13 @@ export class SocketIoServer {
                             .emit("new_message", { from, content });
                     } else {
                         //! trigger push notification for offline user
-                        this.messageService.sendPushNotification({
+                        this.messagesService.sendPushNotification({
                             to,
                             content,
                         });
                     }
                     //! publish to RabbitMQ
-                    await this.messageService.publishMessage({
+                    await this.messagesService.publishMessage({
                         from,
                         to,
                         content,
@@ -117,7 +119,9 @@ export class SocketIoServer {
                             .emit("read_receipt", { messageId });
                     }
                     //! optionally persist read receipt
-                    await this.messageService.publishReadReceipt({ messageId });
+                    await this.messagesService.publishReadReceipt({
+                        messageId,
+                    });
                 },
             );
             socket.on("disconnect", async () => {
@@ -126,6 +130,29 @@ export class SocketIoServer {
                 socket.broadcast.emit("user_offline", userId);
                 log.info("Client disconnected:", socket.id, " User Id", userId);
             });
+
+            //! When our event bus fires, emit via Socket.IO
+            eventBus.on(
+                "auto-message.received",
+                async ({ sender, message, receiver }: IAutoMessage) => {
+                    const socketId = await this.redisRepository.getOnlineUser(
+                        receiver.toHexString(),
+                    );
+                    if (socketId) {
+                        //! Real-time delivery
+                        this.io.to(socketId).emit("new_message", {
+                            from: sender.toHexString(),
+                            content: message,
+                        });
+                    } else {
+                        //! trigger push notification for offline user
+                        this.messagesService.sendPushNotification({
+                            to: receiver.toHexString(),
+                            content: message,
+                        });
+                    }
+                },
+            );
         });
     }
 }

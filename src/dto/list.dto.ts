@@ -2,6 +2,8 @@ import { SortEnum } from "@src/domain";
 import { IsOptionalEnum, IsOptionalInt, IsOptionalString } from "./decorators";
 
 export class ListRequest {
+    [key: string]: any;
+
     @IsOptionalEnum(SortEnum)
     sort: SortEnum = SortEnum.desc;
 

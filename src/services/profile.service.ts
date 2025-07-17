@@ -2,7 +2,7 @@ import { InvalidEmailOrPassword, ItemUpdated } from "@src/config";
 import {
     IProfileService,
     IUser,
-    IUserRepository,
+    IUsersRepository,
     UserJwtPayload,
 } from "@src/domain";
 import {
@@ -15,7 +15,7 @@ import {
 import { NotFoundException } from "@src/packages";
 
 export class ProfileService implements IProfileService {
-    constructor(private readonly userRepository: IUserRepository) {}
+    constructor(private readonly userRepository: IUsersRepository) {}
     async update(email: string, dto: UpdateProfileDto): SuccessReply {
         await this.userRepository.update(email, dto);
         return new SuccessResponse(ItemUpdated);

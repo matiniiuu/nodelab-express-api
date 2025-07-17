@@ -17,6 +17,7 @@ export const DocumentNotFound = (documentName: string = "Document") => {
     return `${documentName}NotFound`;
 };
 //* information
+export const Success = "Success";
 export const ItemCreated = "ItemCreated";
 export const ItemDeleted = "ItemDeleted";
 export const ItemUpdated = "ItemUpdated";

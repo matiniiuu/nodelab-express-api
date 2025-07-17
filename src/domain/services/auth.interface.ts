@@ -1,5 +1,4 @@
 import {
-    DataReply,
     LoginResponse,
     LoginUserDto,
     RegisterUserDto,
@@ -9,7 +8,7 @@ import { UserJwtPayload } from "../entities";
 
 export interface IAuthService {
     register(dto: RegisterUserDto): SuccessReply;
-    login(dto: LoginUserDto): DataReply<LoginResponse>;
+    login(dto: LoginUserDto): Promise<LoginResponse>;
 
     generateAccessToken(user: UserJwtPayload): string;
 }

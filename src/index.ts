@@ -6,12 +6,14 @@ dotenv.config();
 import { envVariables } from "./config";
 import { log } from "./helpers";
 import {
+    AutoMessagesMongoDB,
     ChatsMongoDB,
     MessagesMongoDB,
     UsersMongoDB,
 } from "./repositories/mongodb";
 import { RedisAdapter } from "./repositories/redis";
 import { AuthService, ChatsService, ProfileService } from "./services";
+import { AutoMessagesService } from "./services/auto-messages.service";
 import { MessagesService } from "./services/messages.service";
 import { ExpressServer } from "./transport/express/server";
 import {
@@ -38,34 +40,51 @@ import { SocketIoServer } from "./transport/socket.io";
         const usersRepository = new UsersMongoDB();
         const chatsRepository = new ChatsMongoDB();
         const messagesRepository = new MessagesMongoDB();
+        const autoMessagesRepository = new AutoMessagesMongoDB();
 
         const authService = new AuthService(usersRepository);
         const profileService = new ProfileService(usersRepository);
         const chatsService = new ChatsService(chatsRepository);
-        const messageService = new MessagesService(
+        const messagesService = new MessagesService(
             producerMessagesRabbitMQ,
             messagesRepository,
             chatsService,
         );
 
         const expressServer = new ExpressServer({
-            authService: authService,
-            profileService: profileService,
+            authService,
+            profileService,
+            chatsService,
         });
 
         expressServer.Start(+envVariables.PORT);
+
         new SocketIoServer(expressServer.server, {
             redisRepository,
-            messageService,
+            messagesService,
         });
-        new ConsumerMessagesRabbitMQ().setupMessagesConsumers(messageService);
-        // process
-        //     .on("SIGTERM", expressServer.Shutdown.bind(expressServer))
-        //     .on("SIGINT", expressServer.Shutdown.bind(expressServer))
-        //     .on(
-        //         "uncaughtException",
-        //         expressServer.Shutdown.bind(expressServer),
-        //     );
+
+        const autoMessagesService = new AutoMessagesService(
+            producerMessagesRabbitMQ,
+            autoMessagesRepository,
+            redisRepository,
+            usersRepository,
+            messagesRepository,
+            chatsService,
+        );
+
+        await new ConsumerMessagesRabbitMQ().Init(
+            messagesService,
+            autoMessagesService,
+        );
+
+        process
+            .on("SIGTERM", expressServer.Shutdown.bind(expressServer))
+            .on("SIGINT", expressServer.Shutdown.bind(expressServer))
+            .on(
+                "uncaughtException",
+                expressServer.Shutdown.bind(expressServer),
+            );
     } catch (error) {
         log.error(error);
     }

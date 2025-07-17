@@ -1,10 +1,12 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose, { Document, Schema } from "mongoose";
 
-export interface IAutoMessage extends Document {
+export interface IAutoMessage extends Document<string> {
     sender: mongoose.Types.ObjectId;
     receiver: mongoose.Types.ObjectId;
     message: string;
     sendDate: Date;
+    isQueued: boolean;
+    isSent: boolean;
 }
 
 const AutoMessageSchema = new Schema<IAutoMessage>(
@@ -13,6 +15,8 @@ const AutoMessageSchema = new Schema<IAutoMessage>(
         receiver: { type: Schema.Types.ObjectId, ref: "User", required: true },
         message: { type: String, required: true },
         sendDate: { type: Date, required: true },
+        isQueued: { type: Boolean, default: false },
+        isSent: { type: Boolean, default: false },
     },
     {
         timestamps: true,
@@ -24,7 +28,7 @@ const AutoMessageSchema = new Schema<IAutoMessage>(
     },
 );
 
-export const AutoMessageModel = mongoose.model<IAutoMessage>(
+export const AutoMessage = mongoose.model<IAutoMessage>(
     "AutoMessage",
     AutoMessageSchema,
 );

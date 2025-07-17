@@ -14,7 +14,7 @@ export class MessagesService implements IMessagesService {
     constructor(
         private readonly producer: ProducerMessagesRabbitMQ,
         private readonly repository: IMessagesRepository,
-        private readonly chatService: IChatsService,
+        private readonly chatsService: IChatsService,
     ) {}
 
     async sendPushNotification(
@@ -38,12 +38,12 @@ export class MessagesService implements IMessagesService {
     }
 
     async handleNewMessage(dto: PublishMessageDto): Promise<void> {
-        const chatId = await this.chatService.getOrCreateChatId(
+        const chatId = await this.chatsService.getOrCreateChatId(
             dto.from,
             dto.to,
         );
         const messageId = await this.repository.create({ ...dto, chatId });
-        await this.chatService.updateLastMessage(chatId, messageId);
+        await this.chatsService.updateLastMessage(chatId, messageId);
     }
     async handleReadReceipt(dto: PublishReadReceiptDto): Promise<void> {
         await this.repository.updateReadReceipt(dto);

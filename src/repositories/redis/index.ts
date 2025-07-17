@@ -8,6 +8,7 @@ export class RedisAdapter implements IRedisRepository {
     constructor() {
         this.init();
     }
+
     private client: RedisClientType;
     async init() {
         this.client = createClient({
@@ -28,7 +29,11 @@ export class RedisAdapter implements IRedisRepository {
     async deleteOnlineUser(userId: string): Promise<void> {
         await this.client.hDel("online_users", userId);
     }
-    async getOnlineUser(userId: string): Promise<string> {
-        return `${this.client.hGet("online_users", userId)}`;
+    async getOnlineUser(userId: string): Promise<string | null> {
+        return (await this.client.hGet("online_users", userId)) as string;
+    }
+    async getOnlineUsers(): Promise<string[]> {
+        const users = await this.client.hGetAll("online_users");
+        return Object.values(users); // returns array of socketIds
     }
 }

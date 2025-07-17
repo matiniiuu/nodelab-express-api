@@ -19,6 +19,9 @@ const config = {
     REDIS_PASSWORD: "REDIS_PASSWORD",
 
     RABBITMQ_URI: "RABBITMQ_URI",
+
+    SWAGGER_USERNAME: "SWAGGER_USERNAME",
+    SWAGGER_PASSWORD: "SWAGGER_PASSWORD",
 };
 const envSchema = joi
     .object({
@@ -58,6 +61,9 @@ const envSchema = joi
         [config.REDIS_PASSWORD]: joi.string().required(),
 
         [config.RABBITMQ_URI]: joi.string().required(),
+
+        [config.SWAGGER_USERNAME]: joi.string().required(),
+        [config.SWAGGER_PASSWORD]: joi.string().required(),
     })
     .unknown()
     .required();

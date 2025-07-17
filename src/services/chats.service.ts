@@ -1,8 +1,8 @@
-import { IChat, IChatRepository, IChatsService } from "@src/domain";
+import { IChat, IChatsRepository, IChatsService } from "@src/domain";
 import { ListReply, ListRequest, ListResponse } from "@src/dto";
 
 export class ChatsService implements IChatsService {
-    constructor(private readonly repository: IChatRepository) {}
+    constructor(private readonly repository: IChatsRepository) {}
 
     async list(userId: string, dto: ListRequest): ListReply<IChat> {
         const [result, total] = await this.repository.findAll(userId, dto);
